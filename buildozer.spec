@@ -22,6 +22,7 @@ version = 1.0
 # (list) Application requirements
 # AQUÍ AGREGAMOS PLYER PARA LA VIBRACIÓN
 requirements = python3,kivy==2.3.0,plyer,android
+android.accept_sdk_license = True
 
 # (str) Presplash of the application (Pantalla de carga con tu logo)
 presplash.filename = %(source.dir)s/icon.png
