@@ -1,0 +1,65 @@
+name: Construir APK Final
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Liberar espacio (GitHub a veces se llena rápido con Android)
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      # 2. Instalar Java 17 (Obligatorio para Android moderno)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. Instalar Python 3.10
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 4. Instalar dependencias de Linux necesarias para Kivy
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential git ffmpeg libsdl2-dev libsdl2-image-dev \
+            libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev \
+            libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0 \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            libffi-dev libssl-dev autoconf libtool automake
+
+      # 5. Instalar Buildozer y Cython 3 (Aquí estaba el fallo anterior)
+      - name: Install Buildozer & Cython
+        run: |
+          pip install --upgrade pip
+          pip install buildozer "cython>=3.0.0"
+
+      # 6. Ejecutar Buildozer (Ahora leerá el 'accept_license' del archivo spec)
+      - name: Build with Buildozer
+        run: |
+          buildozer android debug
+
+      # 7. Subir el APK resultante
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiAppFrontenis
+          path: bin/*.apk
