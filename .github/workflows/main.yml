@@ -1,0 +1,37 @@
+name: Construir APK
+on:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # 1. Liberar espacio (por si acaso)
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      # 2. Construir la APP
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          command: buildozer android debug
+          buildozer_version: master
+
+      # 3. Guardar el APK para descargar
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiAppFrontenis
+          path: bin/*.apk
